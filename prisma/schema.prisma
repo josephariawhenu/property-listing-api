@@ -1,0 +1,124 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum Role {
+  BUYER
+  AGENT
+  ADMIN
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  LAND 
+  COMMERCIAL
+}
+
+enum ListingType {
+    SALE
+    RENT
+}
+
+enum ViewingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+
+// Model Creation
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  role Role
+  phone String?
+  createdAt DateTime @default(now())
+  agentProfile AgentProfile?
+  saved SavedProperty[]
+  buyerViewings Viewing[] @relation("buyer")
+  agentViewings Viewing[] @relation("agent")
+}
+
+model AgentProfile {
+  id String @id @default(uuid())
+  userId String @unique
+  agency String
+  licenseNumber String
+  bio String?
+  rating Float @default(0)
+  user User @relation(fields: [userId], references: [id])
+  properties Property[]
+}
+
+model Property {
+  id String @id @default(uuid())
+  agentId String
+  title String
+  description String
+  price Float
+  type ListingType
+  propertyType PropertyType
+  bedrooms Int
+  bathrooms Int
+  area Float
+  address String
+  city String
+  isApproved Boolean @default(false)
+  isFeatured Boolean @default(false)
+  createdAt DateTime @default(now())
+  agent AgentProfile @relation(fields: [agentId], references: [id])
+  images PropertyImage[]
+  saved SavedProperty[]
+  viewings Viewing[]
+}
+
+model PropertyImage {
+  id String @id @default(ulid())
+  propertyId String
+  imageUrl String
+  isPrimary Boolean @default(false)
+  order Int
+  filename String
+  size Int
+  mineType String
+  property Property @relation(fields: [propertyId], references: [id])
+}
+
+model SavedProperty {
+  id String @id @default(ulid())
+  userId String
+  propertyId String
+  savedAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id])
+  property Property @relation(fields: [propertyId], references: [id])
+  @@unique([userId, propertyId])
+}
+
+model Viewing {
+  id String @id @default(ulid())
+  propertyId String
+  buyerId String
+  agentId String
+  scheduleAt DateTime
+  status ViewingStatus @default(PENDING)
+  notes String?
+  property Property @relation(fields: [propertyId], references: [id])
+  buyer User @relation("buyer", fields: [buyerId], references: [id])
+  agent User @relation("agent", fields: [agentId], references: [id])
+}
