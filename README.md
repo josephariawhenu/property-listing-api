@@ -1,61 +1,311 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🏠 Property Listing Platform API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A full-featured real estate listing platform backend built with NestJS, PostgreSQL, and Prisma. Like Zillow, but with robust testing and no dark patterns.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## ✨ Features
 
-## Description
+### Core Functionality
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **User Authentication & Authorization** - JWT-based auth with role-based access control (BUYER, AGENT, ADMIN)
+- **Property Management** - Agents post listings with multiple images; Admin approves before public display
+- **Advanced Search & Filtering** - Filter by city, type (SALE/RENT), property type, price range, bedrooms
+- **Favorites System** - Buyers save properties to their favorites
+- **Viewing Scheduler** - Request & manage property viewings with conflict prevention
+- **Admin Dashboard** - Approve properties, feature listings, manage users
 
-## Project setup
+### Technical Highlights
+
+✅ 80%+ unit test coverage (PropertyService)  
+✅ E2E tests for complete workflows  
+✅ Swagger/OpenAPI documentation  
+✅ Dockerized for easy deployment  
+✅ Prisma ORM with migrations  
+✅ Cascading deletes for data integrity  
+✅ Pagination & sorting on all list endpoints  
+✅ Input validation & error handling
+
+## 🛠️ Tech Stack
+
+- **Runtime**: Node.js 18+
+- **Framework**: NestJS 11
+- **Database**: PostgreSQL 15
+- **ORM**: Prisma
+- **Authentication**: JWT + Passport
+- **Testing**: Jest
+- **Documentation**: Swagger/OpenAPI
+- **Deployment**: Docker & Render
+
+## 📋 Prerequisites
+
+- Node.js 18+
+- PostgreSQL 15+
+- pnpm (or npm)
+
+## 🚀 Local Development
+
+### 1. Clone & Install
 
 ```bash
-$ pnpm install
+git clone <repo-url>
+cd property-listing-platform-api
+pnpm install
 ```
 
-## Compile and run the project
+### 2. Environment Setup
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+Update `.env`:
+
+```
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/property
+JWT_SECRET=your-super-secret-key
+NODE_ENV=development
+```
+
+### 3. Database Setup
 
 ```bash
-# unit tests
+pnpm prisma migrate dev --name init
+pnpm prisma generate
+```
+
+### 4. Start Development Server
+
+```bash
+pnpm start:dev
+```
+
+Server runs at `http://localhost:3000`  
+API Docs at `http://localhost:3000/docs`
+
+## 🐳 Docker Development
+
+```bash
+docker-compose up -d
+```
+
+This starts PostgreSQL and the NestJS app. Logs available via:
+
+```bash
+docker-compose logs -f app
+```
+
+## 📚 API Endpoints
+
+### Authentication
+
+- `POST /api/v1/auth/signup` - Register new user
+- `POST /api/v1/auth/signin` - Login user (returns JWT)
+- `GET /api/v1/auth/signout` - Logout
+
+### Properties
+
+- `POST /api/v1/properties` - Create property (Agent)
+- `GET /api/v1/properties/search` - Search/filter properties
+- `GET /api/v1/properties/:id` - Get property details
+- `PATCH /api/v1/properties/:id` - Update property (Owner/Admin)
+- `DELETE /api/v1/properties/:id` - Delete property (Owner/Admin)
+- `GET /api/v1/properties/agent/listings` - Get agent's properties
+- `GET /api/v1/properties/featured` - Get featured properties
+
+### Saved Properties
+
+- `POST /api/v1/saved-properties/:propertyId` - Save property
+- `DELETE /api/v1/saved-properties/:propertyId` - Unsave property
+- `GET /api/v1/saved-properties` - Get user's saved properties
+
+### Viewings
+
+- `POST /api/v1/viewings` - Request viewing
+- `GET /api/v1/viewings/:id` - Get viewing details
+- `PATCH /api/v1/viewings/:id/status` - Update status (Agent)
+- `DELETE /api/v1/viewings/:id/cancel` - Cancel viewing (Buyer)
+- `GET /api/v1/viewings/agent/list` - Agent's viewings
+- `GET /api/v1/viewings/buyer/list` - Buyer's viewings
+
+### Admin
+
+- `GET /api/v1/admin/dashboard/stats` - Dashboard statistics
+- `GET /api/v1/admin/properties/pending-approval` - Pending approvals
+- `PATCH /api/v1/admin/properties/:id/approve` - Approve property
+- `PATCH /api/v1/admin/properties/:id/feature` - Feature property
+- `GET /api/v1/admin/users` - All users
+- `GET /api/v1/admin/agents` - All agents
+
+## 🧪 Testing
+
+### Run Unit Tests
+
+```bash
+pnpm test
+```
+
+### Run E2E Tests
+
+```bash
+pnpm test:e2e
+```
+
+### Test Coverage
+
+```bash
+pnpm test:cov
+```
+
+Target: 80%+ coverage on core services
+
+## 📁 Project Structure
+
+```
+src/
+├── auth/              # Authentication & JWT
+├── property/          # Property CRUD & search
+├── saved-property/    # Favorites management
+├── viewing/           # Viewing scheduling
+├── admin/             # Admin operations
+├── agent-profile/     # Agent profiles
+├── property-image/    # Image management
+├── app.module.ts      # Root module
+└── main.ts            # Entry point
+
+prisma/
+├── schema.prisma      # Database schema
+└── migrations/        # Database migrations
+
+test/
+└── app.e2e-spec.ts    # E2E tests
+```
+
+## 🔐 Authentication
+
+All protected endpoints require a Bearer token:
+
+```bash
+Authorization: Bearer <jwt_token>
+```
+
+Token obtained from `/auth/signin` or `/auth/signup`
+
+## 🎯 Key Business Rules
+
+✅ Agents can only update their own properties  
+✅ Admin can approve/reject properties  
+✅ Buyers cannot book conflicting viewings  
+✅ Properties must be approved before appearing in search  
+✅ First image uploaded becomes primary  
+✅ Max 8 images per property  
+✅ SavedProperty maintains uniqueness (user can't save same property twice)
+
+## 🚢 Deployment
+
+### Deploy to Render
+
+1. Push code to GitHub
+2. Connect repo to Render
+3. Set environment variables:
+   - `DATABASE_URL` - PostgreSQL connection
+   - `JWT_SECRET` - Strong random key
+   - `NODE_ENV` - production
+4. Deploy
+
+Live API will be at `https://your-app.onrender.com`
+
+### Alternative: Docker Deployment
+
+```bash
+docker build -t property-api:latest .
+docker run -e DATABASE_URL=... -e JWT_SECRET=... -p 3000:3000 property-api:latest
+```
+
+## 📊 Data Models
+
+### User
+
+- id, name, email, hashedPassword, role (BUYER|AGENT|ADMIN)
+- Relationships: agentProfile, savedProperties, viewings
+
+### AgentProfile
+
+- id, userId, agency, licenseNumber, bio, rating
+- Relationships: user, properties
+
+### Property
+
+- id, agentId, title, description, price, type (SALE|RENT)
+- propertyType (HOUSE|APARTMENT|LAND|COMMERCIAL)
+- bedrooms, bathrooms, area, address, city
+- isApproved, isFeatured
+
+### PropertyImage
+
+- id, propertyId, imageUrl, isPrimary, order
+- filename, mimeType, size
+
+### SavedProperty
+
+- id, userId, propertyId, savedAt
+
+### Viewing
+
+- id, propertyId, buyerId, agentId
+- scheduledAt, status (PENDING|CONFIRMED|CANCELLED|COMPLETED)
+- notes
+
+## 🐛 Troubleshooting
+
+### Database Connection Error
+
+```
+Error: ECONNREFUSED
+```
+
+- Ensure PostgreSQL is running: `docker-compose up postgres`
+- Check DATABASE_URL in .env
+
+### Prisma Generation Error
+
+```bash
+pnpm prisma generate
+pnpm prisma migrate deploy
+```
+
+### JWT Errors
+
+- Ensure `JWT_SECRET` is set in .env
+- Token may have expired (expires in 7 days)
+
+## 📝 Contributing
+
+1. Create feature branch: `git checkout -b feature/amazing-feature`
+2. Write tests for new code
+3. Commit: `git commit -m 'Add amazing feature'`
+4. Push & create PR
+
+## 📄 License
+
+MIT License - see LICENSE file
+
+## 👥 Team
+
+Built as part of Backend Engineering Exam - Property Listing Platform Project
+
+---
+
+**Ready to list properties?** Start the server and visit `/docs` for interactive API testing! 🚀
 $ pnpm run test
 
 # e2e tests
+
 $ pnpm run test:e2e
 
 # test coverage
+
 $ pnpm run test:cov
-```
+
+````
 
 ## Deployment
 
@@ -66,7 +316,7 @@ If you are looking for a cloud-based platform to deploy your NestJS application,
 ```bash
 $ pnpm install -g @nestjs/mau
 $ mau deploy
-```
+````
 
 With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
 

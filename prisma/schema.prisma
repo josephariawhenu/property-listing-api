@@ -1,11 +1,8 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  moduleFormat  = "cjs"
 }
 
 datasource db {
@@ -42,17 +39,22 @@ enum ViewingStatus {
 // Model Creation
 
 model User {
-  id String @id @default(uuid())
-  name String
-  email String @unique
-  password String
-  role Role
-  phone String?
-  createdAt DateTime @default(now())
-  agentProfile AgentProfile?
-  saved SavedProperty[]
-  buyerViewings Viewing[] @relation("buyer")
-  agentViewings Viewing[] @relation("agent")
+  id             String   @id @default(uuid())
+  name           String
+  email          String   @unique
+  hashedPassword String
+  role           Role     @default(BUYER)
+  phone          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt()
+
+  agentProfile   AgentProfile?
+  saved          SavedProperty[]
+  buyerViewings  Viewing[] @relation("buyer")
+  agentViewings  Viewing[] @relation("agent")
+  
+  @@index([email])
+  @@index([role])
 }
 
 model AgentProfile {
@@ -62,7 +64,10 @@ model AgentProfile {
   licenseNumber String
   bio String?
   rating Float @default(0)
-  user User @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   properties Property[]
 }
 
@@ -82,10 +87,16 @@ model Property {
   isApproved Boolean @default(false)
   isFeatured Boolean @default(false)
   createdAt DateTime @default(now())
-  agent AgentProfile @relation(fields: [agentId], references: [id])
+  updatedAt DateTime @updatedAt()
+  
+  agent AgentProfile @relation(fields: [agentId], references: [id], onDelete: Cascade)
   images PropertyImage[]
   saved SavedProperty[]
   viewings Viewing[]
+
+  @@index([agentId])
+  @@index([city])
+  @@index([isApproved])
 }
 
 model PropertyImage {
@@ -96,8 +107,9 @@ model PropertyImage {
   order Int
   filename String
   size Int
-  mineType String
-  property Property @relation(fields: [propertyId], references: [id])
+  mimeType String
+  createdAt DateTime @default(now())
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model SavedProperty {
@@ -105,9 +117,12 @@ model SavedProperty {
   userId String
   propertyId String
   savedAt DateTime @default(now())
-  user User @relation(fields: [userId], references: [id])
-  property Property @relation(fields: [propertyId], references: [id])
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
   @@unique([userId, propertyId])
+  @@index([userId])
 }
 
 model Viewing {
@@ -115,10 +130,11 @@ model Viewing {
   propertyId String
   buyerId String
   agentId String
-  scheduleAt DateTime
+  scheduledAt DateTime
   status ViewingStatus @default(PENDING)
   notes String?
-  property Property @relation(fields: [propertyId], references: [id])
-  buyer User @relation("buyer", fields: [buyerId], references: [id])
-  agent User @relation("agent", fields: [agentId], references: [id])
+  createdAt DateTime @default(now())
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  buyer User @relation("buyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  agent User @relation("agent", fields: [agentId], references: [id], onDelete: Cascade)
 }
