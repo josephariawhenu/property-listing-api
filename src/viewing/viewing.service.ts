@@ -306,7 +306,7 @@ export class ViewingService {
           gte: now,
         },
         status: {
-          in: [ViewingStatus.PENDING, ViewingStatus.CONFIRMED],
+          in: ['PENDING', 'CONFIRMED'],
         },
       },
       orderBy: {

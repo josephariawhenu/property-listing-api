@@ -14,7 +14,6 @@ export class PropertyImageService {
   constructor(private prisma: PrismaService) {}
 
   async uploadImages(propertyId: string, files: UploadedFile[]) {
-    // Verify property exists
     const property = await this.prisma.property.findUnique({
       where: { id: propertyId },
     });
@@ -23,7 +22,6 @@ export class PropertyImageService {
       throw new BadRequestException('Property not found');
     }
 
-    // Get current image count
     const currentCount = await this.prisma.propertyImage.count({
       where: { propertyId },
     });
